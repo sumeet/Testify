@@ -43,5 +43,79 @@ class AssertEqualTestCase(TestCase):
             assert False, 'Expected `AssertionError`.'
 
 
+class MyException(Exception):
+    pass
+
+class AssertRaisesAsContextManagerTestCase(TestCase):
+
+    def test_fails_when_exception_should_have_been_raised_but_was_not(self):
+        def exception_should_have_been_raised():
+            with assertions.assert_raises(MyException):
+                pass
+
+        try:
+            exception_should_have_been_raised()
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError('AssertionError should have been raised')
+
+    def test_passes_when_exception_should_have_been_raised_and_was(self):
+        def exception_should_have_been_raised_and_was():
+            with assertions.assert_raises(MyException):
+                raise MyException
+
+        exception_should_have_been_raised_and_was()
+
+    def test_crashes_when_another_exception_class_is_raised(self):
+        def assert_raises_an_exception_and_raise_another():
+            with assertions.assert_raises(MyException):
+                raise ValueError
+
+        try:
+            assert_raises_an_exception_and_raise_another()
+        except ValueError:
+            pass
+        else:
+            raise AssertionError('ValueError should have been raised')
+
+
+class AssertRaisesAsCallableTestCase(TestCase):
+
+    def test_fails_when_exception_should_have_been_raised_but_was_not(self):
+        raises_nothing = lambda: None
+        try:
+            assertions.assert_raises(ValueError, raises_nothing)
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError('AssertionError should have been raised')
+
+    def test_passes_when_exception_should_have_been_raised_and_was(self):
+        def raises_value_error():
+            raise ValueError
+        assertions.assert_raises(ValueError, raises_value_error)
+
+    def test_fails_when_wrong_exception_was_raised(self):
+        def raises_value_error():
+            raise ValueError
+        try:
+            assertions.assert_raises(MyException, raises_value_error)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError('ValueError should have been raised')
+
+    def test_callable_is_called_with_all_arguments(self):
+        class GoodArguments(Exception): pass
+        arg1, arg2, kwarg = object(), object(), object()
+        def check_arguments(*args, **kwargs):
+            assert_equal((arg1, arg2), args)
+            assert_equal({'kwarg': kwarg}, kwargs)
+            raise GoodArguments
+        assertions.assert_raises(GoodArguments, check_arguments, arg1, arg2,
+                                 kwarg=kwarg)
+
+
 if __name__ == '__main__':
     run()
