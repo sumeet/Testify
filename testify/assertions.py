@@ -15,19 +15,47 @@
 
 """Methods to be used inside of assert statements"""
 
+from __future__ import with_statement
+
+import contextlib
+
 from .utils import stringdiffer
 
 
 __testify = 1
 
-def assert_raises(expected_exception_class, callable_obj, *args, **kwargs):
-    """Returns true only if the callable raises expected_exception_class"""
+
+def assert_raises(*args, **kwargs):
+    """Assert an exception is raised as a context manager or by passing in a
+    callable and its arguments.
+
+    As a context manager:
+    >>> with assert_raises(Exception):
+    ...     raise Exception
+
+    Pass in a callable:
+    >>> def raise_exception(arg, kwarg=None):
+    ...     raise Exception
+    >>> assert_raises(Exception, raise_exception, 1, kwarg=234)
+    """
+    if (len(args) == 1) and not kwargs:
+        return _assert_raises_context_manager(args[0])
+    else:
+        return _assert_raises(*args, **kwargs)
+
+@contextlib.contextmanager
+def _assert_raises_context_manager(exception_class):
     try:
-        callable_obj(*args, **kwargs)
-    except expected_exception_class:
-        # we got the expected exception
-        return True
-    assert_not_reached("No exception was raised (expected %s)" % expected_exception_class)
+        yield
+    except exception_class:
+        return
+    else:
+        assert_not_reached("No exception was raised (expected %r)" %
+                           exception_class)
+
+def _assert_raises(exception_class, callable, *args, **kwargs):
+    with _assert_raises_context_manager(exception_class):
+        callable(*args, **kwargs)
 
 def _diff_message(lhs, rhs):
     """If `lhs` and `rhs` are strings, return the a formatted message
