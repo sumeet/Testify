@@ -182,7 +182,7 @@ class TextTestLogger(TestLoggerBase):
             }[status]
 
             if status in ('fail', 'error'):
-                _log.error("%s: %s\n%s", status, self._format_test_method_name(result['method']), ''.join(result['exception_info']))
+                _log.error("%s: %s\n%s", status, self._format_test_method_name(result['method']), ''.join(result['exception_info_pretty']))
             else:
                 _log.info("%s: %s", status, self._format_test_method_name(result['method']))
 
