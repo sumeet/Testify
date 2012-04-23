@@ -1,7 +1,10 @@
+from __future__ import with_statement
+
 from testify import TestCase
 from testify import assertions
 from testify import run
 from testify import assert_equal
+from testify import assert_not_reached
 
 
 class DiffMessageTestCase(TestCase):
@@ -48,24 +51,24 @@ class MyException(Exception):
 
 class AssertRaisesAsContextManagerTestCase(TestCase):
 
-    def test_fails_when_exception_should_have_been_raised_but_was_not(self):
-        def exception_should_have_been_raised():
+    def test_fails_when_exception_is_not_raised(self):
+        def exception_should_be_raised():
             with assertions.assert_raises(MyException):
                 pass
 
         try:
-            exception_should_have_been_raised()
+            exception_should_be_raised()
         except AssertionError:
             pass
         else:
-            raise AssertionError('AssertionError should have been raised')
+            assert_not_reached('AssertionError should have been raised')
 
-    def test_passes_when_exception_should_have_been_raised_and_was(self):
-        def exception_should_have_been_raised_and_was():
+    def test_passes_when_exception_is_raised(self):
+        def exception_should_be_raised():
             with assertions.assert_raises(MyException):
                 raise MyException
 
-        exception_should_have_been_raised_and_was()
+        exception_should_be_raised()
 
     def test_crashes_when_another_exception_class_is_raised(self):
         def assert_raises_an_exception_and_raise_another():
@@ -82,21 +85,21 @@ class AssertRaisesAsContextManagerTestCase(TestCase):
 
 class AssertRaisesAsCallableTestCase(TestCase):
 
-    def test_fails_when_exception_should_have_been_raised_but_was_not(self):
+    def test_fails_when_exception_is_not_raised(self):
         raises_nothing = lambda: None
         try:
             assertions.assert_raises(ValueError, raises_nothing)
         except AssertionError:
             pass
         else:
-            raise AssertionError('AssertionError should have been raised')
+            assert_not_reached('AssertionError should have been raised')
 
-    def test_passes_when_exception_should_have_been_raised_and_was(self):
+    def test_passes_when_exception_is_raised(self):
         def raises_value_error():
             raise ValueError
         assertions.assert_raises(ValueError, raises_value_error)
 
-    def test_fails_when_wrong_exception_was_raised(self):
+    def test_fails_when_wrong_exception_is_raised(self):
         def raises_value_error():
             raise ValueError
         try:
@@ -104,7 +107,7 @@ class AssertRaisesAsCallableTestCase(TestCase):
         except ValueError:
             pass
         else:
-            raise AssertionError('ValueError should have been raised')
+            assert_not_reached('ValueError should have been raised')
 
     def test_callable_is_called_with_all_arguments(self):
         class GoodArguments(Exception): pass

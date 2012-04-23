@@ -15,6 +15,8 @@
 
 """Methods to be used inside of assert statements"""
 
+from __future__ import with_statement
+
 import contextlib
 
 from .utils import stringdiffer
