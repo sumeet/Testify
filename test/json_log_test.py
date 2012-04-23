@@ -69,7 +69,6 @@ class JSONReporterTestCase(test_case.TestCase):
 
         Regression test for GitHub #13.
         """
-
         result = test_result.TestResult(self.extended_test_case.test_method)
 
         self.json_reporter.test_start(result.to_dict())
@@ -87,7 +86,8 @@ class JSONReporterTestCase(test_case.TestCase):
         result = json.loads(log_lines)
 
         assert_equal('extended', result['method']['module'])
-        assert_equal('extended ExtendedTestCase.test_method', result['method']['full_name'])
+        assert_equal('extended ExtendedTestCase.test_method',
+                     result['method']['full_name'])
 
 
 if __name__ == '__main__':
