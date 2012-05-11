@@ -483,20 +483,20 @@ class let(object):
         self._func = func
         self._result = self._unsaved
 
-    def __get__(self, obj, cls):
-        if obj is None:
+    def __get__(self, test_case, cls):
+        if test_case is None:
             return self
         if self._result is self._unsaved:
-            self._save_result(self._func(obj))
-            self._register_reset_after_test_completion(obj)
+            self._save_result(self._func(test_case))
+            self._register_reset_after_test_completion(test_case)
         return self._result
 
     def _save_result(self, result):
         self._result = result
 
-    def _register_reset_after_test_completion(self, obj):
-        obj.register_callback(TestCase.EVENT_ON_COMPLETE_TEST_METHOD,
-                              lambda _: self._reset_value())
+    def _register_reset_after_test_completion(self, test_case):
+        test_case.register_callback(TestCase.EVENT_ON_COMPLETE_TEST_METHOD,
+                                    lambda _: self._reset_value())
 
     def _reset_value(self):
         self._result = self._unsaved
